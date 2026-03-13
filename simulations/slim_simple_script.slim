@@ -1,0 +1,43 @@
+initialize() {
+    initializeSLiMModelType("nonWF");
+    initializeTreeSeq();
+
+    initializeMutationRate(0.0);
+    initializeRecombinationRate(1e-8);
+
+    initializeMutationType("m1", 0.5, "f", 0.0);
+    initializeMutationType("m2", 0.5, "f", 0.0);
+    m2.convertToSubstitution = F;
+
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElement(g1, 0, 4999999);
+}
+
+mutationEffect(m2) {
+    tibetan = sim.subpopulations[2];
+    if ((subpop == tibetan) & (sim.cycle >= 500))
+        return 1.03;
+    return 1.0;
+}
+
+1 early() {
+    sim.readFromPopulationFile("t-d_burnin_with_epas1.trees");
+    community.tick = 1;
+    sim.cycle = 1;
+    catn("Burn-in loaded");
+}
+
+500 late() {
+    tibetan = sim.subpopulations[2];
+    denisovan = sim.subpopulations[3];
+    nMigrants = asInteger(0.03 * tibetan.individualCount);
+    migrants = sample(denisovan.individuals, nMigrants);
+    tibetan.takeMigrants(migrants);
+    catn("Introgression pulse occurred");
+}
+
+5000 late() {
+    sim.treeSeqOutput("epas1_introgression_output.trees");
+    catn("Simulation finished");
+    sim.simulationFinished();
+}
