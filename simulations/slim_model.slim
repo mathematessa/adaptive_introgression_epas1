@@ -1,0 +1,107 @@
+initialize() {
+	initializeSLiMModelType("WF");
+	initializeTreeSeq();
+	
+	initializeMutationRate(1.25e-8);
+	initializeRecombinationRate(1.25e-8);
+	
+	initializeMutationType("m1", 0.5, "f", 0.0);
+	initializeMutationType("m2", 0.5, "f", 0.0);
+	m2.convertToSubstitution = F;
+	
+	initializeGenomicElementType("g1", m1, 1.0);
+	initializeGenomicElement(g1, 0, 299999);
+	
+	defineConstant("EPAS1_POS", 150000);
+	defineConstant("DENISOVAN_ID", 1);
+	defineConstant("AFRICAN_ID", 3);
+	defineConstant("EURASIAN_ID", 5);
+	defineConstant("TIBETAN_ID", 6);
+	defineConstant("ADMIX_GEN", 2);
+	
+	if (!exists("SEL_COEFF")) defineConstant("SEL_COEFF", 0.001);
+	if (!exists("ADMIX_PROP")) defineConstant("ADMIX_PROP", 0.1);
+	if (!exists("NEUTRALITY_PERIOD")) defineConstant("NEUTRALITY_PERIOD", 100);
+	defineConstant("STOP_GEN", 2000);
+	defineConstant("INFILE", "/Users/ekaterina/Desktop/RESEARCH/SLiM/t_d_burnin4.trees");
+	if (!exists("OUTFILE")) defineConstant("OUTFILE", "/Users/ekaterina/Desktop/RESEARCH/SLiM/epas1_introgression_output5.trees");
+	
+	defineConstant("SELECTION_START", ADMIX_GEN + NEUTRALITY_PERIOD);
+}
+
+function (void) reportState(void) {
+	den = sim.subpopulations[sim.subpopulations.id == DENISOVAN_ID];
+	afr = sim.subpopulations[sim.subpopulations.id == AFRICAN_ID];
+	eur = sim.subpopulations[sim.subpopulations.id == EURASIAN_ID];
+	tib = sim.subpopulations[sim.subpopulations.id == TIBETAN_ID];
+	m2muts = sim.mutationsOfType(m2);
+	catn("Generation: " + sim.cycle);
+	if (length(m2muts) > 0) {
+		if (size(den) == 1)
+			catn("  EPAS1 frequency in Denisovans: " + paste(sim.mutationFrequencies(den, m2muts)));
+		if (size(tib) == 1)
+			catn("  EPAS1 frequency in Tibetans: " + paste(sim.mutationFrequencies(tib, m2muts)));
+		for (mut in m2muts) {
+			catn("Selection coefficient: " + mut.selectionCoeff);
+		}
+	}
+	else {
+		catn("  No active m2 mutation");
+	}
+}
+
+1 late() {
+	sim.readFromPopulationFile(INFILE);
+	community.tick = 1;
+	sim.cycle = 1;
+	
+	den = sim.subpopulations[sim.subpopulations.id == DENISOVAN_ID];
+	tib = sim.subpopulations[sim.subpopulations.id == TIBETAN_ID];
+	
+	if (size(den) != 1)
+		stop("Could not find Denisovan population.");
+	if (size(tib) != 1)
+		stop("Could not find Tibetan population.");
+	
+	den.haplosomes.addNewMutation(m2, 0.0, EPAS1_POS);
+	reportState();
+}
+
+2 late() {
+	den = sim.subpopulations[sim.subpopulations.id == DENISOVAN_ID];
+	tib = sim.subpopulations[sim.subpopulations.id == TIBETAN_ID];
+	tib.setMigrationRates(den, ADMIX_PROP);
+	reportState();
+}
+
+3 late() {
+	den = sim.subpopulations[sim.subpopulations.id == DENISOVAN_ID];
+	tib = sim.subpopulations[sim.subpopulations.id == TIBETAN_ID];
+	tib.setMigrationRates(den, 0.0);
+	reportState();
+}
+
+4:STOP_GEN late() {
+	if (sim.cycle == SELECTION_START) {
+		m2muts = sim.mutationsOfType(m2);
+		for (mut in m2muts)
+			mut.setSelectionCoeff(SEL_COEFF);
+	}
+	m2muts = sim.mutationsOfType(m2);
+	den = sim.subpopulations[sim.subpopulations.id == DENISOVAN_ID];
+	tib = sim.subpopulations[sim.subpopulations.id == TIBETAN_ID];
+	if (sim.mutationFrequencies(tib, m2muts) == 0.0) {
+		stop("Mutation lost in Tibetians.");
+	}
+	if (sim.mutationFrequencies(tib, m2muts) == 1.0) {
+		stop("Mutation fixed in Tibetians.");
+	}
+	if (sim.cycle == STOP_GEN) {
+		reportState();
+		final_freq = sim.mutationFrequencies(tib, m2muts);
+		writeFile("/Users/ekaterina/Desktop/RESEARCH/SLiM/freq_output.txt", final_freq + "\n");
+		sim.treeSeqOutput(OUTFILE);
+		catn("Simulation finished");
+		sim.simulationFinished();
+	}
+}
