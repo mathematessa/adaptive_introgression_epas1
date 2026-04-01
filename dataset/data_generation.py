@@ -11,7 +11,7 @@ from tqdm import tqdm
 N_SIM = 1000
 OUT_DIR = Path("dataset5")
 SLIM_SCRIPT = Path("slim5.slim")
-EXTRACT_SCRIPT = Path("/Users/ekaterina/Desktop/RESEARCH/SLiM/output15.py")
+EXTRACT_SCRIPT = Path("feature_extract.py")
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
