@@ -47,7 +47,7 @@ def main() -> None:
 
         sel_coeff = float(np.exp(np.random.uniform(np.log(0.001), np.log(0.05))))
         admix_prop = 0.01
-        neutrality_times = [0, 50, 100, 200, 500, 750, 1000, 1300, 1600, 1900]
+        neutrality_times = [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
         neutrality_time = int(np.random.choice(neutrality_times))
 
         trees_file = OUT_DIR / f"{sim_id}.trees"
