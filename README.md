@@ -2,9 +2,15 @@
 
 User guide:
 
-In simulations folder you can find 4 files, run them in the following order:
+In simulations folder you can find 5 files, for current version run 2 of them in the following order:
 
 1. msprime_burnin.py -- ancestry
-2. epas1_to_trees.py -- adding EPAS1 mutation
-3. slim script -- introgression simulation
-4. trees_to data.py -- processing simulation into train synthetic data
+2. slim model -- introgression & selection simulation
+
+For the dataset run these files:
+
+1. data_generation.py -- main generator of simulations
+2. preprocessing.py -- transfer generated data to csv file
+3. processing.py -- creating ml-ready dataset with train, validation and test
+
+The full model is in model folder.
