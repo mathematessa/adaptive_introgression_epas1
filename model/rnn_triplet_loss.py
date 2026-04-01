@@ -13,12 +13,12 @@ from sklearn.metrics import classification_report
 
 DATA_DIR  = Path("dataset_ready")
 
-N_FEAT    = 5
-SEQ_LEN   = 32
+N_FEAT = 5
+SEQ_LEN = 32
 EMBED_DIM = 64
-HIDDEN    = 128
-N_LAYERS  = 2
-DROPOUT   = 0.2
+HIDDEN = 128
+N_LAYERS = 2
+DROPOUT = 0.2
 N_CLS_PER_BATCH = 10
 N_PER_CLS = 4
 BASE_MARGIN = 0.5
@@ -26,7 +26,7 @@ EPOCHS = 20
 LR = 3e-4
 WEIGHT_DECAY = 1e-4
 WARMUP_EPOCHS = 5
-NEUTRALITY_TIMES = torch.tensor([0, 50, 100, 200, 500, 750, 1000, 1300, 1600, 1900],dtype=torch.float32)
+NEUTRALITY_TIMES = torch.tensor([200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000],dtype=torch.float32)
 CLASS_NAMES = [f"t={t}" for t in NEUTRALITY_TIMES.int().tolist()]
 
 def build_margin_matrix(times: torch.Tensor, base: float) -> torch.Tensor:
